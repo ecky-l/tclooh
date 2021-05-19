@@ -262,4 +262,4 @@ namespace eval ::ooh {
 
 } ;# namespace ::oo
 
-package provide tclooh 1.0.0
+package provide tclooh 2.0.0
