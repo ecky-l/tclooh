@@ -8,5 +8,5 @@
 # script is sourced, the variable $dir must contain the
 # full path name of this file's directory.
 
-package ifneeded tclooh 0.1 [list source [file join $dir tcloo.tcl]]
-package ifneeded otree 1.0 [list source [file join $dir otree.tcl]]
+package ifneeded tclooh 1.0.0 [list source [file join $dir tclooh.tcl]]
+package ifneeded otree 1.0.0 [list source [file join $dir otree.tcl]]

@@ -1,7 +1,7 @@
 ## otree.tcl (created by Tloona here)
 ## The itree::Node as tcloo implementation
 
-package require tclooh 0.1
+package require tclooh 1.0.0
 
 namespace eval ::otree {
 
@@ -174,4 +174,4 @@ namespace eval ::otree {
 
 } ;# namespace ::otree
 
-package provide otree 1.0
+package provide otree 1.0.0
