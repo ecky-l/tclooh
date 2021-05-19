@@ -1,6 +1,6 @@
 ## tclooh.tcl (created by Tloona here)
 
-namespace eval ::tclooh {
+namespace eval ::ooh {
 
 ## \brief A mixin object that defines "public variable" behaviour of Itcl.
 # 
@@ -76,7 +76,7 @@ namespace eval ::tclooh {
 # the variables.
 # Additionally the variables and defaults shall be installed automatically
 # in derived classes (but not in mixins)
-::oo::class create (class) {
+::oo::class create class {
     superclass ::oo::class
     variable _Defaults
     variable _SetGet
@@ -85,10 +85,10 @@ namespace eval ::tclooh {
     constructor {args} {
         set _Defaults {}
         set _SetGet {}
-        interp alias {} ::oo::define::(variable) {} [self] (variable)
-        interp alias {} ::oo::define::(superclass) {} [self] (superclass)
-        interp alias {} ::oo::define::(constructor) {} [self] (constructor)
-        ::oo::define [self] mixin ::tclooh::confcget
+        interp alias {} ::oo::define::property {} [self] property
+        interp alias {} ::oo::define::extends {} [self] extends
+        interp alias {} ::oo::define::construct {} [self] construct
+        ::oo::define [self] mixin ::ooh::confcget
         next {*}$args
     }
     
@@ -154,16 +154,16 @@ namespace eval ::tclooh {
     # superclass and defaults defined in this class and all its objects.
     # Private variables are denoted by preceeding underscore _ and
     # filtered out here.
-    method (superclass) {args} {
+    method extends {args} {
         ::oo::define [self] superclass {*}$args
         
         set filterExpr {expr { [string comp -l 1 $x _] ? $x : [continue] }}
         lmap c [info cl superclass [self]] {
             lmap v [lmap x [info cl var $c] $filterExpr] {
                 if {[$c varDefault $v val]} {
-                    ::oo::define [self] (variable) $v {*}$val
+                    ::oo::define [self] property $v {*}$val
                 } else {
-                    ::oo::define [self] (variable) $v
+                    ::oo::define [self] property $v
                 }
             }
         }
@@ -178,7 +178,7 @@ namespace eval ::tclooh {
     # If a constructor is defined, it needs access to the variables and defaults.
     # Prepend code to install the variables in front of the constructor body, so
     # that the variable defaults are installed first, before anything else. 
-    method (constructor) {args} {
+    method construct {args} {
         append cbody apply " \{ " 
         append cbody [info cl definition [self class] installVars] \n " \}"
         append cbody " " {[self] [self class] {*}[info class variables [self class]]} 
@@ -189,7 +189,7 @@ namespace eval ::tclooh {
     ## \brief The Variable with default command.
     #
     # Is executed with a definition script after [create] (from the 
-    # constructor) or with calls to oo::define <cls> (variable). 
+    # constructor) or with calls to oo::define <cls> property. 
     # Arranges for the default to be installed in all existing 
     # or new instances of this class.
     # For private and protected variables there is additional support
@@ -199,7 +199,7 @@ namespace eval ::tclooh {
     # constructed from the varname (uppercase first letter for 
     # peotected, underscore _ for private). This happens only if there
     # are no methods of the same name already defined.
-    method (variable) {args} {
+    method property {args} {
         ::oo::define [self] variable [lindex $args 0]
         if {[llength $args] >= 2} {
             dict set _Defaults [lindex $args 0] [lrange $args 1 end]
@@ -255,7 +255,7 @@ namespace eval ::tclooh {
         }
     }
     
-    export (variable) (superclass) (constructor)
+    export property extends construct
     
 } ;# defaultvars
 

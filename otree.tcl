@@ -5,45 +5,45 @@ package require tclooh 1.0.0
 
 namespace eval ::otree {
 
-::tclooh::(class) create node {
+::ooh::class create node {
     
     ## \brief the node name, which is also displayed
-    (variable) name ""
+    property name ""
 
     ## \brief image: an image to display in front of the name.
-    (variable) image {}
+    property image {}
     
     ## \brief depth of this node in a tree hierarchy
-    (variable) level 0
+    property level 0
     
     ## \brief Display format list. 
     # Contains a string as accepted by [format] (e.g. %s) followed by 
     # the attributes that are to be displayed, e.g. -name. E.g. {%s -name}. 
     # The resulting string is displayed as the node's name in a tree display
-    (variable) displayformat ""
+    property displayformat ""
     
     ## \brief indicates whether the node is displayed
-    (variable) displayed no
+    property displayed no
     
     ## \brief A type associated with the node. Makes image display in a browser easy
-    (variable) type
+    property type
     
     ## \brief Whether the item is expanded on a display
-    (variable) expanded 1
+    property expanded 1
     
     ## \brief columnData that is associated with an item.
     # When the node is displayed in a Ttk browser, this is the data that goes in the 
     # columns. The list must match the column count.
-    (variable) coldata {}
+    property coldata {}
     
     ## \brief indicates that this node should be deleted when it is removed from its parent.
-    (variable) dynamic 0
+    property dynamic 0
     
     ## \brief the child nodes
-    (variable) Children {}
+    property Children {}
     
     ## \brief The parent node
-    (variable) Parent {} -get -set
+    property Parent {} -get -set
     
     destructor {
         my removeChildren
@@ -167,9 +167,9 @@ namespace eval ::otree {
     }
 }
 
-::tclooh::(class) create cnode {
-    (superclass) ::otree::node
-    (variable) x ""
+::ooh::class create cnode {
+    extends ::otree::node
+    property x ""
 }
 
 } ;# namespace ::otree
