@@ -10,7 +10,8 @@
 proc _load-tclooh {dir} {
     source [file join $dir tclooh.tcl]
     source [file join $dir ooh-singleton.tcl]
+    package provide tclooh 1.1.0
 }
 
-package ifneeded tclooh 1.0.0 [list _load-tclooh $dir]
+package ifneeded tclooh 1.1.0 [list _load-tclooh $dir]
 package ifneeded otree 1.0.0 [list source [file join $dir otree.tcl]]

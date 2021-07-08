@@ -15,7 +15,7 @@ namespace eval ::ooh {
 # object. Since this has been repetitive all the time, we can now let
 # the mixin object do it automatically.
 ::oo::class create confcget {
-    
+
     ## \brief does automatically [configure -var value] pairs.
     # 
     # But only if the args list is expressible as -var value pairs.
@@ -30,7 +30,7 @@ namespace eval ::ooh {
             next {*}$args
         }
     }
-    
+
     ## \brief setting -var value pairs
     method configure {args} {
         if {[llength $args] % 2 != 0
@@ -46,7 +46,7 @@ namespace eval ::ooh {
             set $var $val
         }
     }
-    
+
     ## \brief get the value of -variable
     method cget {var} {
         if {[string compare -length 1 $var -] != 0} {
@@ -59,7 +59,7 @@ namespace eval ::ooh {
         my variable $var
         return [set $var]
     }
-    
+
 }
 
 ## \brief A meta class for default variable assignment and inheritance
@@ -80,7 +80,7 @@ namespace eval ::ooh {
     superclass ::oo::class
     variable _Defaults
     variable _SetGet
-    
+
     ## \brief Installs handlers for oo::define before creating the class
     constructor {args} {
         set _Defaults {}
@@ -91,7 +91,7 @@ namespace eval ::ooh {
         ::oo::define [self] mixin ::ooh::confcget
         next {*}$args
     }
-    
+
     method DoCmdGC {oldname newname op} {
         if {[info obj isa object $obj]} {
             trace remove command $obj {rename delete} \
@@ -99,7 +99,7 @@ namespace eval ::ooh {
             $obj destroy
         }
     }
-    
+
     ## \brief Delete locally created objects
     method DoVarGC {obj name1 name2 op} {
         if {[info obj isa object $obj]} {
@@ -108,7 +108,7 @@ namespace eval ::ooh {
         uplevel [list trace remove variable $name1 \
             {write unset} [list [namespace origin my] DoVarGC $obj]]
     }
-    
+
     ## \brief Create an object that is linked to a variable
     #
     # Works like create, but instead of a command name, the first argument is 
@@ -131,7 +131,7 @@ namespace eval ::ooh {
             {write unset} [list [namespace origin my] DoVarGC $obj]]
         return
     }
-    
+
     ## \brief install variable defaults in case there is no (constructor)
     method new {args} {
         set obj [next {*}$args]
@@ -139,7 +139,7 @@ namespace eval ::ooh {
         my installVars $obj [self] {*}[info class variables [self]]
         return $obj
     }
-    
+
     ## \brief create named or local objects 
     method create {args} {
         set obj [next {*}$args]
@@ -147,7 +147,7 @@ namespace eval ::ooh {
         my installVars $obj [self] {*}[info class variables [self]]
         return $obj
     }
-    
+
     ## \brief Installs variables from superclass in this class
     #
     # Can be used instead of [superclass] to have the variables from 
@@ -156,7 +156,7 @@ namespace eval ::ooh {
     # filtered out here.
     method extends {args} {
         ::oo::define [self] superclass {*}$args
-        
+
         set filterExpr {expr { [string comp -l 1 $x _] ? $x : [continue] }}
         lmap c [info cl superclass [self]] {
             lmap v [lmap x [info cl var $c] $filterExpr] {
@@ -169,7 +169,7 @@ namespace eval ::ooh {
         }
         return ""
     }
-    
+
     ## \brief Defines the constructor and installs variables
     #
     # Prepend some code in front of the constructor body, which takes the
@@ -185,7 +185,7 @@ namespace eval ::ooh {
         append cbody [lindex $args 1]
         ::oo::define [self] constructor [lindex $args 0] $cbody
     }
-    
+
     ## \brief The Variable with default command.
     #
     # Is executed with a definition script after [create] (from the 
@@ -204,7 +204,7 @@ namespace eval ::ooh {
         if {[llength $args] >= 2} {
             dict set _Defaults [lindex $args 0] [lrange $args 1 end]
         }
-        
+
         # install getters and setters for private/protected variables
         set vn [string index [lindex $args 0] 0]
         if {[string match $vn _] || [string is upper $vn] 
@@ -222,13 +222,13 @@ namespace eval ::ooh {
                     set[set varName] {value} " set $varName \$value "
             }
         }
-        
+
         lmap o [info class inst [self]] {
             my installVars $o [self] [lindex $args 0]
         }
         return
     }
-    
+
     ## \brief Checks whether there is a default value.
     #
     # If there is one, returns true and sets the value in valPtr
@@ -241,7 +241,7 @@ namespace eval ::ooh {
         }
         return 0
     }
-    
+
     ## \brief Installs variables from the args list in an object obj.
     method installVars {obj cls args} {
         set ov [info obj vars $obj]
@@ -254,12 +254,11 @@ namespace eval ::ooh {
             }
         }
     }
-    
+
     export property extends construct
-    
+
 } ;# defaultvars
 
 
 } ;# namespace ::oo
 
-package provide tclooh 1.0.0
