@@ -8,7 +8,7 @@ The TclOO object system for Tcl is nowadays defacto standard for object oriented
 But the downside of so much flexibility is that the core `oo::class`, although it can be used for everyday jobs, is rather limited for that purpose. The main point is that people are used to the concept of properties in a class, which store state of an object. But with TclOO it is rather cumbersome to achieve that, one always has to declare the properties as `my variable` in each method body like so:
 
 ```
-oo::class define A {
+oo::class create A {
     constructor {args} {
         my variable X
         set X 1
@@ -47,7 +47,7 @@ Normal TclOO objects are not automatically cleaned up. They live in memory until
 Everthing else works the same way as with base TclOO. Every keyword and functionality of TclOO classes can be used in *tclooh* too, mixins, forwards etc. The above example looks in *tclooh* like that:
 
 ```
-ooh::class define A {
+ooh::class create A {
 
     property X
 
