@@ -16,10 +16,23 @@ namespace eval ::ooh {}
             return $Instance
         }
         set Instance [next {*}$args]
+
+        # make sure the Instance property is reset when the singleton object
+        # is destroyed. We set up a filter for that.
+        append mBody "if \{\$args == \"\"\} \{ [namespace origin my] DeleteInstance \}" \n
+        append mBody "next \{*\}\$args" \n
+        oo::define [self] method OnDestroyFilter {args} $mBody
+        oo::define [self] filter OnDestroyFilter
+
+        return $Instance
     }
 
     method create {args} {
         throw {OOH SINGLETON_CREATE} "A singleton cannot be \[create\]'d! Use \[new\] to get the instance"
+    }
+
+    method DeleteInstance {} {
+        set Instance {}
     }
 
 }
