@@ -31,6 +31,13 @@ namespace eval ::ooh {}
         throw {OOH SINGLETON_CREATE} "A singleton cannot be \[create\]'d! Use \[new\] to get the instance"
     }
 
+    method get {} {
+        if {$Instance == {}} {
+            throw {OOH SINGLETON_NOT_CREATED} "Singleton not yet created. Use \[new\] (with args) to create it"
+        }
+        return $Instance
+    }
+
     method DeleteInstance {} {
         set Instance {}
     }
