@@ -10,6 +10,7 @@
 proc _load-tclooh {dir} {
     source [file join $dir tclooh.tcl]
     source [file join $dir ooh-singleton.tcl]
+    source [file join $dir ooh-factory.tcl]
     package provide tclooh 1.1.0
 }
 
