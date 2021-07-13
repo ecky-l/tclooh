@@ -11,20 +11,22 @@ namespace eval ::ooh {}
 
     property Instance {}
 
+    construct {args} {
+        next {*}$args
+        # make sure the Instance property is reset when the singleton object
+        # is destroyed. We set up a filter for that.
+        append mBody {set m [lindex [info level [expr {[info level]-1}]] 1]} \n
+        append mBody {if {$m eq "destroy"}} " \{ [namespace origin my] DeleteInstance \}" \n
+        append mBody {next {*}$args}
+        oo::define [self] method OnDestroyFilter {args} $mBody
+        oo::define [self] filter OnDestroyFilter
+    }
+
     method new {args} {
         if {$Instance != {}} {
             return $Instance
         }
         set Instance [next {*}$args]
-
-        # make sure the Instance property is reset when the singleton object
-        # is destroyed. We set up a filter for that.
-        append mBody "if \{\$args == \"\"\} \{ [namespace origin my] DeleteInstance \}" \n
-        append mBody "next \{*\}\$args" \n
-        oo::define [self] method OnDestroyFilter {args} $mBody
-        oo::define [self] filter OnDestroyFilter
-
-        return $Instance
     }
 
     method create {args} {
@@ -38,8 +40,14 @@ namespace eval ::ooh {}
         return $Instance
     }
 
+    method unknown {args} {
+        if {$Instance == {}} {
+            throw {OOH SINGLETON_NOT_CREATED} "Singleton not yet created. Use \[new\] (with args) to create it"
+        }
+        $Instance {*}$args
+    }
+
     method DeleteInstance {} {
         set Instance {}
     }
-
 }
