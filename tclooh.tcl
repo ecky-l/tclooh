@@ -33,17 +33,36 @@ namespace eval ::ooh {
 
     ## \brief setting -var value pairs
     method configure {args} {
-        if {[llength $args] % 2 != 0
-              || [lsearch [lmap _x [dict keys $args] {string comp -l 1 $_x -}] 1] >= 0 } {
-            error "not var/value pairs: $args"
+        if {[llength $args] % 2 != 0} {
+            throw {OOH CONFIGURE} "arguments list must have even length"
         }
+        if {[lsearch [lmap _x [dict keys $args] {string comp -l 1 $_x -}] 1] >= 0} {
+            throw {OOH CONFIGURE} "keys in args list must all start with a -"
+        }
+
+        if {$args == {}} {
+            # return current settings
+            set cfg {}
+            foreach {prop} [[info obj class [self]] info properties] {
+                if {[string is lower [string index $prop 0]]} {
+                    my variable $prop
+                    if {[info exists $prop]} {
+                        lappend cfg -[set prop] [set $prop]
+                    }
+                }
+            }
+            return $cfg
+        }
+
         foreach {var val} $args {
             set var [string range $var 1 end]
-            if {[string is upper [string index $var 0]]} {
-                error "$var seems to be a private variable"
+            if {$var in [[info obj class [self]] info properties]} {
+                if {[string is upper [string index $var 0]]} {
+                    throw {OOH CONFIGURE} "$var seems to be a private variable"
+                }
+                my variable $var
+                set $var $val
             }
-            my variable $var
-            set $var $val
         }
     }
 
@@ -53,11 +72,14 @@ namespace eval ::ooh {
             error "Usage: obj cget -var"
         }
         set var [string range $var 1 end]
-        if {[string is upper [string index $var 0]]} {
-            error "$var seems to be a private variable"
+        if {$var in [[info obj class [self]] info properties]} {
+            if {[string is upper [string index $var 0]]} {
+                throw {OOH CGET} "$var seems to be a private variable"
+            }
+            my variable $var
+            return [set $var]
         }
-        my variable $var
-        return [set $var]
+        throw {OOH CGET} "unknown property $var in [info obj class [self]]"
     }
 
 }
@@ -80,11 +102,13 @@ namespace eval ::ooh {
     superclass ::oo::class
     variable _Defaults
     variable _SetGet
+    variable _Properties
 
     ## \brief Installs handlers for oo::define before creating the class
     constructor {args} {
         set _Defaults {}
         set _SetGet {}
+        set _Properties {}
         interp alias {} ::oo::define::property {} [self] property
         interp alias {} ::oo::define::extends {} [self] extends
         interp alias {} ::oo::define::construct {} [self] construct
@@ -201,6 +225,7 @@ namespace eval ::ooh {
     # are no methods of the same name already defined.
     method property {args} {
         ::oo::define [self] variable [lindex $args 0]
+        lappend _Properties [lindex $args 0]
         if {[llength $args] >= 2} {
             dict set _Defaults [lindex $args 0] [lrange $args 1 end]
         }
@@ -229,6 +254,16 @@ namespace eval ::ooh {
         return
     }
 
+    method info {what} {
+        switch -- $what {
+            properties {
+                return $_Properties
+            }
+            default {}
+        }
+        throw {OOH INFO} "unknown or ambiguous subcommand '$what': must be properties"
+    }
+
     ## \brief Checks whether there is a default value.
     #
     # If there is one, returns true and sets the value in valPtr
@@ -255,7 +290,7 @@ namespace eval ::ooh {
         }
     }
 
-    export property extends construct
+    export property extends construct info
 
 } ;# defaultvars
 
